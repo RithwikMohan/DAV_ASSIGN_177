@@ -3,120 +3,137 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # ===============================
-# LOAD DATA
+# LOAD & CLEAN DATA
 # ===============================
 df = pd.read_csv("shoes.csv")
 
+# Strip whitespace and lowercase column names to avoid KeyErrors
+df.columns = df.columns.str.strip().str.lower()
 
-# Ensure numeric columns for NumPy operations
-np_array = df.select_dtypes(include=[np.number]).to_numpy()
+print("Available columns:", df.columns)
 
 # ===============================
 # NUMPY OPERATIONS
 # ===============================
 
+# Ensure numeric columns for NumPy operations
+np_array = df.select_dtypes(include=[np.number]).to_numpy()
+
 # Fixed Type Arrays
-print("Data Types:", np_array.dtype)
+print("\nData Types:", np_array.dtype)
 
 # Creating Arrays
 array1 = np.array([1, 2, 3])
 array2 = np.arange(10)
-print("Array1:", array1)
+print("\nArray1:", array1)
 print("Array2:", array2)
 
 # Indexing and Slicing
-print("First Row:", np_array[0])
+print("\nFirst Row:", np_array[0])
 print("First 3 columns of first 5 rows:\n", np_array[:5, :3])
 
 # Reshaping
 if np_array.size % 2 == 0:
     reshaped = np_array.reshape(-1, 2)
-    print("Reshaped shape:", reshaped.shape)
+    print("\nReshaped shape:", reshaped.shape)
 
 # Concatenation and Splitting
 split1, split2 = np.array_split(np_array, 2)
 concat_array = np.concatenate((split1, split2))
-print("Concatenated Shape:", concat_array.shape)
+print("\nConcatenated Shape:", concat_array.shape)
 
 # Universal Functions & Aggregation
-print("Mean Price:", np.mean(np_array[:, 0]))
-print("Sum Offer Price:", np.sum(np_array[:, 1]))
+print("\nMean of column 0:", np.mean(np_array[:, 0]))
+print("Sum of column 1:", np.sum(np_array[:, 1]))
 
 # Broadcasting
-print("Discounts:", np_array[:, 0] - np_array[:, 1])
+print("\nColumn 0 - Column 1:\n", np_array[:, 0] - np_array[:, 1])
 
 # Comparisons, Boolean Arrays, Masks
 mask = (np_array[:, 0] - np_array[:, 1]) > 1000
-print("High Discounts:\n", np_array[mask])
+print("\nHigh Discounts:\n", np_array[mask])
 
 # Fancy Indexing
 indices = [0, 2, 4]
-print("Selected Rows:\n", np_array[indices])
+print("\nSelected Rows:\n", np_array[indices])
 
 # Sorting
 sorted_array = np_array[np.argsort(np_array[:, 0])]
-print("Sorted by Price:\n", sorted_array[:5])
+print("\nSorted by Column 0:\n", sorted_array[:5])
 
 # Partial Sorting
 k = 5
 part_sorted = np.partition(np_array[:, 0], k)[:k]
-print(f"Top {k} Cheapest Prices:\n", part_sorted)
+print(f"\nTop {k} Cheapest Prices:\n", part_sorted)
 
 # Clipping
 clipped_prices = np.clip(np_array[:, 0], 0, 5000)
-print("Clipped Prices:\n", clipped_prices)
+print("\nClipped Prices:\n", clipped_prices)
 
-# Structured Arrays and Compound Types
+# Structured Arrays
 structured = np.array([("Crocs", 5), ("FILA", 6)], dtype=[('brand', 'U10'), ('size', 'i4')])
-print("Structured Array:\n", structured)
+print("\nStructured Array:\n", structured)
 
 # ===============================
 # PANDAS OPERATIONS
 # ===============================
 
 # Series and DataFrame Objects
-print("Series Example:\n", df["brand"].head())
+if 'brand' in df.columns:
+    print("\nSeries Example:\n", df["brand"].head())
+else:
+    print("\nColumn 'brand' not found in dataset.")
 
 # Indexing & Selecting
-print("Selecting color column:\n", df["color"].head())
+if 'color' in df.columns:
+    print("\nSelecting color column:\n", df["color"].head())
 
-# Universal Functions, Index Alignment
-print("Price + Offer Price:\n", df["price"] + df["offer_price"])
+# Universal Functions
+if 'price' in df.columns and 'offer_price' in df.columns:
+    print("\nPrice + Offer Price:\n", df["price"] + df["offer_price"])
 
 # Handling Missing Data
 df.fillna(0, inplace=True)
-print("Null Values:\n", df.isnull().sum())
+print("\nNull Values After Fill:\n", df.isnull().sum())
 
 # Hierarchical Indexing
-df_hier = df.set_index(["brand", "color"])
-print("Hierarchical Index Sample:\n", df_hier.head())
+if 'brand' in df.columns and 'color' in df.columns:
+    df_hier = df.set_index(["brand", "color"])
+    print("\nHierarchical Index Sample:\n", df_hier.head())
 
 # Descriptive Stats
-print("Descriptive Stats:\n", df.describe())
+print("\nDescriptive Stats:\n", df.describe())
 
 # Correlation
-print("Correlation:\n", df[["price", "offer_price"]].corr())
+if 'price' in df.columns and 'offer_price' in df.columns:
+    print("\nCorrelation:\n", df[["price", "offer_price"]].corr())
 
 # Value Counts
-print("Brand Counts:\n", df["brand"].value_counts())
+if 'brand' in df.columns:
+    print("\nBrand Counts:\n", df["brand"].value_counts())
 
 # .apply() usage
-df["price_category"] = df["price"].apply(lambda x: "High" if x > 3000 else "Low")
-print("Price Categories:\n", df[["price", "price_category"]].head())
+if 'price' in df.columns:
+    df["price_category"] = df["price"].apply(lambda x: "High" if x > 3000 else "Low")
+    print("\nPrice Categories:\n", df[["price", "price_category"]].head())
 
 # Sorting
-sorted_df = df.sort_values(by="price", ascending=False)
-print("Top 5 Expensive Products:\n", sorted_df[["brand", "price"]].head())
+if 'price' in df.columns:
+    sorted_df = df.sort_values(by="price", ascending=False)
+    print("\nTop 5 Expensive Products:\n", sorted_df[["brand", "price"]].head())
 
 # Filtering
-filtered = df[(df["brand"] == "FILA") & (df["price"] < 2000)]
-print("Filtered FILA under 2000:\n", filtered)
+if 'brand' in df.columns and 'price' in df.columns:
+    filtered = df[(df["brand"] == "FILA") & (df["price"] < 2000)]
+    print("\nFiltered FILA under 2000:\n", filtered)
 
 # Rename column
-df.rename(columns={"offer_price": "discounted_price"}, inplace=True)
+if 'offer_price' in df.columns:
+    df.rename(columns={"offer_price": "discounted_price"}, inplace=True)
 
 # Drop column
-df.drop(columns=["price_category"], inplace=True)
+if "price_category" in df.columns:
+    df.drop(columns=["price_category"], inplace=True)
 
 # ===============================
 # COMBINING DATASETS
@@ -124,67 +141,76 @@ df.drop(columns=["price_category"], inplace=True)
 
 # Concat
 df_concat = pd.concat([df, df], axis=0)
-print("Concatenated Shape:", df_concat.shape)
+print("\nConcatenated Shape:", df_concat.shape)
 
 # Merge
-merged_df = df.merge(df, on="brand", how="inner")
-print("Merged Shape:", merged_df.shape)
+if 'brand' in df.columns:
+    merged_df = df.merge(df, on="brand", how="inner")
+    print("Merged Shape:", merged_df.shape)
 
 # Grouping & Aggregation
-grouped = df.groupby("brand")["price"].mean()
-print("Grouped by brand:\n", grouped)
+if 'brand' in df.columns and 'price' in df.columns:
+    grouped = df.groupby("brand")["price"].mean()
+    print("\nGrouped by brand:\n", grouped)
 
 # Pivot Table
-pivot = df.pivot_table(index="color", values="discounted_price", aggfunc="mean")
-print("Pivot Table:\n", pivot)
+if 'color' in df.columns and 'discounted_price' in df.columns:
+    pivot = df.pivot_table(index="color", values="discounted_price", aggfunc="mean")
+    print("\nPivot Table:\n", pivot)
 
 # ===============================
 # MATPLOTLIB VISUALIZATIONS
 # ===============================
 
 # Bar Plot
-grouped.plot(kind="bar", title="Avg Price by Brand", figsize=(8, 4))
-plt.ylabel("Avg Price")
-plt.tight_layout()
-plt.show()
+if 'brand' in df.columns and 'price' in df.columns:
+    grouped.plot(kind="bar", title="Avg Price by Brand", figsize=(8, 4))
+    plt.ylabel("Avg Price")
+    plt.tight_layout()
+    plt.show()
 
 # Pie Chart
-df["color"].value_counts().plot(kind="pie", autopct="%1.1f%%", title="Color Distribution")
-plt.ylabel("")
-plt.show()
+if 'color' in df.columns:
+    df["color"].value_counts().plot(kind="pie", autopct="%1.1f%%", title="Color Distribution")
+    plt.ylabel("")
+    plt.show()
 
 # Scatter Plot
-plt.scatter(df["price"], df["discounted_price"], alpha=0.6, color='green')
-plt.xlabel("Price")
-plt.ylabel("Discounted Price")
-plt.title("Price vs Discounted Price")
-plt.grid(True)
-plt.show()
+if 'price' in df.columns and 'discounted_price' in df.columns:
+    plt.scatter(df["price"], df["discounted_price"], alpha=0.6, color='green')
+    plt.xlabel("Price")
+    plt.ylabel("Discounted Price")
+    plt.title("Price vs Discounted Price")
+    plt.grid(True)
+    plt.show()
 
 # Histogram
-plt.hist(df["price"], bins=20, color='skyblue', edgecolor='black')
-plt.title("Price Distribution")
-plt.xlabel("Price")
-plt.ylabel("Frequency")
-plt.show()
+if 'price' in df.columns:
+    plt.hist(df["price"], bins=20, color='skyblue', edgecolor='black')
+    plt.title("Price Distribution")
+    plt.xlabel("Price")
+    plt.ylabel("Frequency")
+    plt.show()
 
 # Box Plot
-df.boxplot(column=["price", "discounted_price"])
-plt.title("Box Plot of Price and Discounted Price")
-plt.ylabel("Amount")
-plt.show()
+if 'price' in df.columns and 'discounted_price' in df.columns:
+    df.boxplot(column=["price", "discounted_price"])
+    plt.title("Box Plot of Price and Discounted Price")
+    plt.ylabel("Amount")
+    plt.show()
 
 # Line Plot (First 20 records)
-sampled = df[["price", "discounted_price"]].head(20)
-plt.plot(sampled["price"], label="Original Price", marker='o')
-plt.plot(sampled["discounted_price"], label="Discounted", marker='x')
-plt.title("Price vs Discounted Price (First 20)")
-plt.legend()
-plt.grid()
-plt.show()
+if 'price' in df.columns and 'discounted_price' in df.columns:
+    sampled = df[["price", "discounted_price"]].head(20)
+    plt.plot(sampled["price"], label="Original Price", marker='o')
+    plt.plot(sampled["discounted_price"], label="Discounted", marker='x')
+    plt.title("Price vs Discounted Price (First 20)")
+    plt.legend()
+    plt.grid()
+    plt.show()
 
 # ===============================
 # EXPORT MODIFIED CSV
 # ===============================
 df.to_csv("modified_data.csv", index=False)
-print("Saved modified data to modified_data.csv")
+print("\nSaved modified data to modified_data.csv")
